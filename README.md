@@ -1,0 +1,1 @@
+# ProjetoIEEIA_AnaliseSentimentos
