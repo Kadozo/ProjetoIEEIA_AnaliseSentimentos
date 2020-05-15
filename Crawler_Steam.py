@@ -13,7 +13,7 @@ def salva_avaliaçoes(link):
     for a in comentarios:
         salva.append(Limpa_comentario(a))
     arq = open("comentarios_bruto.txt", "a")
-    arq.write("_________________________________\n")
+    #arq.write("_________________________________\n") acho que não é necessario @gabriel
     for c in salva:
         arq.write(c + "\n")
     arq.close
