@@ -13,7 +13,7 @@ def salva_avaliaçoes(link):
     for a in comentarios:
         salva.append(Limpa_comentario(a))
     arq = open("comentarios_bruto.txt", "a")
-    arq.write("_________________________________\n")
+    #arq.write("_________________________________\n")
     for c in salva:
         arq.write(c + "\n")
     arq.close
@@ -28,7 +28,10 @@ def Limpa_comentario(comentario):
     recomendado = recomendação_class[list + 1]
     # Pega comentario
     comentario = comentario_class.replace('<div class="content">', '')
-    comentario = comentario.replace("								</div>", "")
+    comentario = comentario.replace('								</div>', '')
+    comentario = comentario.replace('</div>', '')
+    comentario = comentario.replace('<br/>', '')
+    comentario = comentario.replace('<div class="bb_h1">', '')
     return (recomendado + " : " + comentario)
 
 
