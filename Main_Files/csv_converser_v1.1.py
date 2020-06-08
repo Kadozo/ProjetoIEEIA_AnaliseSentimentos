@@ -23,9 +23,9 @@ while(linha != ""):
     Comment = Comment[0].replace("[", "")
     Comment = Comment.replace("]", "")
     Comment = Comment.replace(".", "")
-    
-    CommentToken = nk.word_tokenize(Comment)
 
+    Tokenizer = nk.TweetTokenizer(reduce_len=3)
+    CommentToken = Tokenizer.tokenize(Comment)
     #escreve em cada coluna do arquivo a sua avaliação e seu respectivo comentário.
     cw.writerow([Avalliation, CommentToken])
     linha = file.readline()
