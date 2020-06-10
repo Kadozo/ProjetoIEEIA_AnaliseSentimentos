@@ -1,22 +1,48 @@
 import csv
 import nltk as nk
+import re
+
+
+# Recebe uma lista de token e retorna uma lista de token sem stopwords
+def remove_stopwords(tokens):
+    # Pega a lista de stopwords da biblioteca nltk
+    stopwords = set(nk.corpus.stopwords.words('portuguese'))
+    frase_tratada = []
+    # Qualquer palavra que não esteja na lista de stopwords é adicioinada em frase_tratada
+    for palavra in tokens:
+        if palavra not in stopwords:
+            frase_tratada.append(palavra)
+    return frase_tratada
+
+
+# Recebe uma lista de tokens e retorna uma lista de tokens sem os caracteres especificados
+def remove_caracter(tokens):
+    token_tratado = []
+    for word in tokens:
+        word = re.sub('[.:;.,!@#$"''"]', '', word)
+        token_tratado.append(word)
+    for w in token_tratado:
+        if w == '':
+            token_tratado.remove(w)
+    return token_tratado
+
+
 # abre o arquivo correspondente
 file = open("comentarios_bruto.txt", "r")
-
 
 # csv writer criado
 cw = csv.writer(open('comentarios.csv', 'w', newline=''))
 
 # escreve uma linha do csv para cada coluna
-cw.writerow(['Avaliação','Comentário'])
-linha = linha = file.readline()
-while(linha != ""):  
+cw.writerow(['Avaliação', 'Comentário'])
+linha = file.readline()
+while linha != "":
     linhaSep = linha.split(maxsplit=2)
-      
-    #remove o : da lista, pois não tem nenhuma utilidade para o csv.
+
+    # remove o : da lista, pois não tem nenhuma utilidade para o csv.
     linhaSep[1] = linhaSep.pop(2)
-    
-    #separa toda a string da avaliação em uma lista, em que cada index é uma avaliação
+
+    # separa toda a string da avaliação em uma lista, em que cada index é uma avaliação
     Avalliation = linhaSep[0].split(maxsplit=0)
     Comment = linhaSep[1].split(maxsplit=0)
 
@@ -25,8 +51,10 @@ while(linha != ""):
     Comment = Comment.replace(".", "")
 
     Tokenizer = nk.TweetTokenizer(reduce_len=3)
-    CommentToken = Tokenizer.tokenize(Comment)
-    #escreve em cada coluna do arquivo a sua avaliação e seu respectivo comentário.
+    Comment = Tokenizer.tokenize(Comment)
+    Comment = remove_stopwords(Comment)
+    CommentToken = remove_caracter(Comment)
+    # escreve em cada coluna do arquivo a sua avaliação e seu respectivo comentário.
     cw.writerow([Avalliation, CommentToken])
     linha = file.readline()
 print("Os comentários foram tokenizados e importados para um arquivo .csv!")
