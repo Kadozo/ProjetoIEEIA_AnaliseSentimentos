@@ -8,15 +8,27 @@ def salva_avaliaçoes(link):
     page = requests.get(link)  # cria o objeto do requeste
     soup = BeautifulSoup(page.content, 'html.parser')  # faz o requeste
 
-    comentarios = soup.findAll(attrs={'class': re.compile(r"^review_box$")})
+    pags = soup.findAll("a",class_="pagelink")
+    max_page=1
+    if(pags):
+        for a in pags:
+            if(int(a.text)> int(max_page)):
+                max_page=int(a.text)
     salva = []
-    for a in comentarios:
-        salva.append(Limpa_comentario(a))
-    arq = open("comentarios_bruto.txt", "a")
+    for i in range(1,int(max_page)+1):
+        page = requests.get(link+"?p="+str(i))  # cria o objeto do requeste
+        soup = BeautifulSoup(page.content, 'html.parser')  # faz o requeste
+        comentarios = soup.findAll(attrs={'class': re.compile(r"^review_box$")})
+        for a in comentarios:
+            salva.append(Limpa_comentario(a))
+    arq = open("comentarios_bruto.txt", "a", encoding="UTF-8")
     #arq.write("_________________________________\n")
     for c in salva:
         arq.write(c + "\n")
     arq.close
+    nome = link.replace("https://steamcommunity.com/id/","")
+    nome = nome.replace("/recommended/","")
+    print(f' {nome} foi adicionado')
 
 
 def Limpa_comentario(comentario):
