@@ -19,7 +19,7 @@ def remove_stopwords(tokens):
 def remove_caracter(tokens):
     token_tratado = []
     for word in tokens:
-        word = re.sub('[.:;.,!@#$"''"]', '', word)
+        word = re.sub('[.:;,+-=_!@#$?*()<>~^/|\"''"]', '', word)
         token_tratado.append(word)
     for w in token_tratado:
         if w == '':
@@ -28,7 +28,7 @@ def remove_caracter(tokens):
 
 
 # abre o arquivo correspondente
-file = open("comentarios_bruto.txt", "r")
+file = open("comentarios_bruto.txt", "r", encoding="UTF-8")
 
 # cria um pandas.DataFrame para armazena os resultados
 df = pd.DataFrame(columns=["Avaliação", "Comentário"])
@@ -52,7 +52,7 @@ while linha != "":
     Tokenizer = nk.TweetTokenizer(reduce_len=3)
     Comment = Tokenizer.tokenize(Comment)
     Comment = remove_stopwords(Comment)
-    CommentToken = remove_caracter(Comment)
+    Comment = remove_caracter(Comment)
     # escreve em cada coluna do arquivo a sua avaliação e seu respectivo comentário.
     df = df.append({"Avaliação":Avalliation,"Comentário":Comment}, ignore_index=True)
 
