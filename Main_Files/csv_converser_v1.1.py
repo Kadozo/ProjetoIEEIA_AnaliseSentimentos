@@ -28,7 +28,7 @@ def remove_caracter(tokens):
 
 
 # abre o arquivo correspondente
-file = open("comentarios_bruto.txt", "r")
+file = open("comentarios_bruto.txt", "r", encoding="UTF-8")
 
 # cria um pandas.DataFrame para armazena os resultados
 df = pd.DataFrame(columns=["Avaliação", "Comentário"])
