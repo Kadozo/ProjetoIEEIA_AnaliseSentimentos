@@ -19,8 +19,6 @@ totalScore = 0
 i=0
 boole = False
 allBalanced = False
-allNotBalanced = False
-valores = []
 while(i < 10):
     while(boole == False):
         resp = input("Deseja dados balanceados? y/n \n")
@@ -73,7 +71,6 @@ while(i < 10):
     writeResult(score, allBalanced, balancedFile, notBalancedFile)
     allBalanced = False
     boole = False
-
 
 average = totalScore/10
 balancedFile.close()
