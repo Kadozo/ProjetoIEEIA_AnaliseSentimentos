@@ -3,110 +3,59 @@ from sklearn.svm import SVC
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
 
-#pego todos os dados de forma balanceada 50%-50%
-dados = balancear.get_balanced()
-coment=dados["Comentário"]
-aval = dados["Avaliação"]
+def writeResult(score, allBalanced, balancedFile, notBalancedFile):
+    if (allBalanced == True):
+        balancedFile.write(str(score) + "\n")
+    else:
+        notBalancedFile.write(str(score) + "\n")
 
-#dados de treino
-x_treino = coment[:int(len(coment) *.8) ]
-y_treino = aval[:int(len(aval) *.8) ]
 
-#dados de validação
-x_test = coment[int(len(coment) *.8): ]
-y_test = aval[int(len(aval) *.8): ]
+balancedFile = open("ResultadosBalanceados.txt", "a")
+notBalancedFile = open("ResultadosDesbalanceados.txt", "a")
+totalScore = 0
+i = 0
+boole = False
+allBalanced = False
+while (i < 10):
+    while (boole == False):
+        resp = input("Deseja dados balanceados? y/n \n")
+        if (resp == "y"):
+            # pego todos os dados de forma balanceada 50%-50%
+            dados = balancear.get_balanced()
+            boole = True
+            allBalanced = True
+        elif (resp == "n"):
+            # pega os dados desbalanceados
+            dados = balancear.shuffle()
+            boole = True
+        else:
+            boole = False
 
-#vetorização e escolhendo o classificador linear
-pipeline = Pipeline([
-  ('counts', CountVectorizer()),
-  ('classifier', SVC(kernel='linear',probability=True,random_state=1))
-])
-pipeline.fit(x_treino, y_treino)
-#score linear
-print("linear:")
-print(pipeline.score(x_test, y_test))
+    coment=dados["Comentário"]
+    aval = dados["Avaliação"]
 
-#vetorização e escolhendo o classificador poly
-pipeline = Pipeline([
-  ('counts', CountVectorizer()),
-  ('classifier', SVC(kernel='poly',probability=True,random_state=1))
-])
-pipeline.fit(x_treino, y_treino)
-#score poly
-print("poly:")
-print(pipeline.score(x_test, y_test))
+    #dados de treino
+    x_treino = coment[:int(len(coment) *.8) ]
+    y_treino = aval[:int(len(aval) *.8) ]
 
-#vetorização e escolhendo o classificador rbf
-pipeline = Pipeline([
-  ('counts', CountVectorizer()),
-  ('classifier', SVC(kernel='rbf',probability=True,random_state=1))
-])
-pipeline.fit(x_treino, y_treino)
-#score rbf
-print("rbf:")
-print(pipeline.score(x_test, y_test))
-#vetorização e escolhendo o classificador sigmoid
-pipeline = Pipeline([
-  ('counts', CountVectorizer()),
-  ('classifier', SVC(kernel='sigmoid',probability=True,random_state=1))
-])
-pipeline.fit(x_treino, y_treino)
-#score sigmoid
-print("sigmoid:")
-print(pipeline.score(x_test, y_test))
+    #dados de validação
+    x_test = coment[int(len(coment) *.8): ]
+    y_test = aval[int(len(aval) *.8): ]
 
-####################################################################################
-print("DB DESBALANCEADA")
-
-import pandas as pd
-
-dados = pd.read_csv("comentarios.csv")
-coment=dados["Comentário"]
-aval = dados["Avaliação"]
-
-#dados de treino
-x_treino = coment[:int(len(coment) *.8) ]
-y_treino = aval[:int(len(aval) *.8) ]
-
-#dados de validação
-x_test = coment[int(len(coment) *.8): ]
-y_test = aval[int(len(aval) *.8): ]
-
-#vetorização e escolhendo o classificador linear
-pipeline = Pipeline([
-  ('counts', CountVectorizer()),
-  ('classifier', SVC(kernel='linear',probability=True,random_state=1))
-])
-pipeline.fit(x_treino, y_treino)
-#score linear
-print("linear:")
-print(pipeline.score(x_test, y_test))
-
-#vetorização e escolhendo o classificador poly
-pipeline = Pipeline([
-  ('counts', CountVectorizer()),
-  ('classifier', SVC(kernel='poly',probability=True,random_state=1))
-])
-pipeline.fit(x_treino, y_treino)
-#score poly
-print("poly:")
-print(pipeline.score(x_test, y_test))
-
-#vetorização e escolhendo o classificador rbf
-pipeline = Pipeline([
-  ('counts', CountVectorizer()),
-  ('classifier', SVC(kernel='rbf',probability=True,random_state=1))
-])
-pipeline.fit(x_treino, y_treino)
-#score rbf
-print("rbf:")
-print(pipeline.score(x_test, y_test))
-#vetorização e escolhendo o classificador sigmoid
-pipeline = Pipeline([
-  ('counts', CountVectorizer()),
-  ('classifier', SVC(kernel='sigmoid',probability=True,random_state=1))
-])
-pipeline.fit(x_treino, y_treino)
-#score sigmoid
-print("sigmoid:")
-print(pipeline.score(x_test, y_test))
+    #vetorização e escolhendo o classificador linear
+    pipeline = Pipeline([
+      ('counts', CountVectorizer()),
+      ('classifier', SVC(kernel='linear',probability=True,random_state=1))
+    ])
+    pipeline.fit(x_treino, y_treino)
+    #score linear
+    score = pipeline.score(x_test, y_test)
+    totalScore += score
+    i += 1
+    writeResult(score, allBalanced, balancedFile, notBalancedFile)
+    allBalanced = False
+    boole = False
+average = totalScore / 10
+balancedFile.close()
+notBalancedFile.close()
+print(average)
