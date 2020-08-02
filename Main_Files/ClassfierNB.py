@@ -7,10 +7,20 @@ from nltk.tokenize import TweetTokenizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 
+def writeResult(score, allBalanced, balancedFile, notBalancedFile): 
+    if(allBalanced == True):
+        balancedFile.write(str(score)+"\n")
+    else:
+        notBalancedFile.write(str(score)+"\n")
+    
+balancedFile = open("ResultadosBalanceados.txt", "a")
+notBalancedFile = open("ResultadosDesbalanceados.txt", "a")
 totalScore = 0
 i=0
 boole = False
-
+allBalanced = False
+allNotBalanced = False
+valores = []
 while(i < 10):
     while(boole == False):
         resp = input("Deseja dados balanceados? y/n \n")
@@ -18,9 +28,10 @@ while(i < 10):
             #pego todos os dados de forma balanceada 50%-50%
             dados = balancear.get_balanced()
             boole = True
+            allBalanced = True
         elif(resp == "n"):
             #pega os dados desbalanceados
-            dados = pd.read_csv("comentarios.csv")
+            dados = balancear.shuffle()
             boole = True
         else:
             boole = False
@@ -51,14 +62,20 @@ while(i < 10):
        # print(t + ", " + c)
 
     #array de probabilidades
-    print(modelLearn.classes_)
-    print(modelLearn.predict_proba(freq_comments).round(2))
+    #print(modelLearn.classes_)
+    #print(modelLearn.predict_proba(freq_comments).round(2))
 
     #score
     print(modelLearn.score(freq_comments, dados_test_aval))
-    totalScore += modelLearn.score(freq_comments, dados_test_aval)
-    i += 1
+    score = modelLearn.score(freq_comments, dados_test_aval)
+    totalScore += score
+    i += 1   
+    writeResult(score, allBalanced, balancedFile, notBalancedFile)
+    allBalanced = False
     boole = False
 
+
 average = totalScore/10
+balancedFile.close()
+notBalancedFile.close()
 print(average)
