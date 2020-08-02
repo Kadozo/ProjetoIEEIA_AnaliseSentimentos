@@ -1,5 +1,4 @@
 import balancear
-from nltk.tokenize import TweetTokenizer
 from sklearn.svm import SVC
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
@@ -56,4 +55,58 @@ pipeline.fit(x_treino, y_treino)
 print("sigmoid:")
 print(pipeline.score(x_test, y_test))
 
+####################################################################################
+print("DB DESBALANCEADA")
 
+import pandas as pd
+
+dados = pd.read_csv("comentarios.csv")
+coment=dados["Comentário"]
+aval = dados["Avaliação"]
+
+#dados de treino
+x_treino = coment[:int(len(coment) *.8) ]
+y_treino = aval[:int(len(aval) *.8) ]
+
+#dados de validação
+x_test = coment[int(len(coment) *.8): ]
+y_test = aval[int(len(aval) *.8): ]
+
+#vetorização e escolhendo o classificador linear
+pipeline = Pipeline([
+  ('counts', CountVectorizer()),
+  ('classifier', SVC(kernel='linear',probability=True,random_state=1))
+])
+pipeline.fit(x_treino, y_treino)
+#score linear
+print("linear:")
+print(pipeline.score(x_test, y_test))
+
+#vetorização e escolhendo o classificador poly
+pipeline = Pipeline([
+  ('counts', CountVectorizer()),
+  ('classifier', SVC(kernel='poly',probability=True,random_state=1))
+])
+pipeline.fit(x_treino, y_treino)
+#score poly
+print("poly:")
+print(pipeline.score(x_test, y_test))
+
+#vetorização e escolhendo o classificador rbf
+pipeline = Pipeline([
+  ('counts', CountVectorizer()),
+  ('classifier', SVC(kernel='rbf',probability=True,random_state=1))
+])
+pipeline.fit(x_treino, y_treino)
+#score rbf
+print("rbf:")
+print(pipeline.score(x_test, y_test))
+#vetorização e escolhendo o classificador sigmoid
+pipeline = Pipeline([
+  ('counts', CountVectorizer()),
+  ('classifier', SVC(kernel='sigmoid',probability=True,random_state=1))
+])
+pipeline.fit(x_treino, y_treino)
+#score sigmoid
+print("sigmoid:")
+print(pipeline.score(x_test, y_test))
