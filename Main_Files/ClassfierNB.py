@@ -64,8 +64,8 @@ while(i < 10):
     #print(modelLearn.predict_proba(freq_comments).round(2))
 
     #score
-    print(modelLearn.score(freq_comments, dados_test_aval))
     score = modelLearn.score(freq_comments, dados_test_aval)
+    print(score)
     totalScore += score
     i += 1   
     writeResult(score, allBalanced, balancedFile, notBalancedFile)
