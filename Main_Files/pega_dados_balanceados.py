@@ -14,6 +14,7 @@ def get_dados(vet,sample_size=0.8,balanced=True):
         else:
             print(f'Erro at {a}')
     cR = embaralhar_vet(cR)
+    cN = embaralha r_vet(cN)
     r = len(cR)
     n = len(cN)
     treino = get_df(cR[:int(r*sample_size)],cN[:int(n*sample_size)],balanced)
