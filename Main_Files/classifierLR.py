@@ -3,32 +3,66 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
+import balancear
 
-df = pd.read_csv('comentarios.csv').sample(1000, random_state=42, replace=True)
-comments = df["Comentário"]
-evaluation = df["Avaliação"]
-evaluation.value_counts()
-df.head()
+#balanceamento
+def writeResult(score, allBalanced, balancedFile, notBalancedFile): 
+    if(allBalanced == True):
+        balancedFile.write(str(score)+"\n")
+    else:
+        notBalancedFile.write(str(score)+"\n")
+    
+balancedFile = open("ResultadosBalanceadosLR.txt", "a")
+notBalancedFile = open("ResultadosDesbalanceadosLR.txt", "a")
+totalScore = 0
+i=0
+allBalanced = False
+resp = input("Deseja dados balanceados? y/n \n")
+while(i < 10):
+    if(resp == "y"):
+        #pego todos os dados de forma balanceada 50%-50%
+        dados = balancear.get_balanced()
+        allBalanced = True
+    elif(resp == "n"):
+        #pega os dados desbalanceados
+        dados = balancear.shuffle()
 
-#vetorização dos dados
-vect = CountVectorizer(ngram_range=(1, 1))
-vect.fit(comments)
-text_vect = vect.transform(comments)
+    #df = pd.read_csv('comentarios.csv').sample(1000, random_state=42, replace=True)
+    comments = dados["Comentário"]
+    evaluation = dados["Avaliação"]
+    evaluation.value_counts()
+    dados.head()
 
-#dados de treino e de teste
-X_train,X_test,y_train,y_test = train_test_split(
-    text_vect,  
-    evaluation,
-    test_size = 0.3, 
-    random_state = 42
-)
+    #vetorização dos dados
+    vect = CountVectorizer(ngram_range=(1, 1))
+    vect.fit(comments)
+    text_vect = vect.transform(comments)
 
-#Classe LogisticRegression - Modelo de machine learning
-clf = LogisticRegression(random_state=0, solver='newton-cg')
-clf = clf.fit(X_train, y_train)
+    #dados de treino e de teste
+    X_train,X_test,y_train,y_test = train_test_split(
+        text_vect,  
+        evaluation,
+        test_size = 0.3, 
+        random_state = 42
+    )
 
-#porcentagem de acerto do modelo
-y_prediction = clf.predict(X_test)
-f1 = f1_score(y_prediction, y_test, average='weighted')
+    #Classe LogisticRegression - Modelo de machine learning
+    clf = LogisticRegression(random_state=0, solver='newton-cg')
+    clf = clf.fit(X_train, y_train)
 
-print("porcentagem de acerto: ", f1)
+    #porcentagem de acerto do modelo
+    y_prediction = clf.predict(X_test)
+    f1 = f1_score(y_prediction, y_test, average='weighted')
+
+    print("porcentagem de acerto: ", f1)
+
+    # score
+    totalScore += f1
+    i += 1   
+    writeResult(f1, allBalanced, balancedFile, notBalancedFile)
+    allBalanced = False
+
+average = totalScore/10
+balancedFile.close()
+notBalancedFile.close()
+print(average)
