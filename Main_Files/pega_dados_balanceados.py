@@ -1,6 +1,7 @@
 import pandas as pd
 import random
-def get_dados(df,sample_size=0.8,balanced=True):
+def get_dados(vet,sample_size=0.8,balanced=True):
+    df = pd.DataFrame(data= vet,columns=["Avaliação","Comentário"])
     coment=df["Comentário"]
     aval = df["Avaliação"]
     cR = []
@@ -12,6 +13,7 @@ def get_dados(df,sample_size=0.8,balanced=True):
             cN.append(coment[a])
         else:
             print(f'Erro at {a}')
+    cR = embaralhar_vet(cR)
     r = len(cR)
     n = len(cN)
     treino = get_df(cR[:int(r*sample_size)],cN[:int(n*sample_size)],balanced)
@@ -30,6 +32,21 @@ def embaralhar(nwDF):
     for a in range( m ):
         n = int(random.random()*10000000%len(l))
         rDF.at[c]=nwDF.loc[l[n]].values
+        c+=1
+        del(l[n])
+    print(rDF)
+    return rDF
+
+def embaralhar_vet(vet):
+    l=[]
+    for a in range(len(vet)):
+        l.append(a)
+    rDF = []
+    c=0
+    m = len(l)
+    for a in range( m ):
+        n = int(random.random()*10000000%len(l))
+        rDF.append(vet[l[n]])
         c+=1
         del(l[n])
     return rDF
