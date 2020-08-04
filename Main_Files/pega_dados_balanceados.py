@@ -18,7 +18,7 @@ def get_dados(vet,sample_size=0.8,balanced=True):
     r = len(cR)
     n = len(cN)
     treino = get_df(cR[:int(r*sample_size)],cN[:int(n*sample_size)],balanced)
-    test   = get_df(cR[int(r*sample_size):],cN[int(n*sample_size):],balanced)
+    test   = get_df(cR[int(r*sample_size):],cN[int(n*sample_size):],True)
     
     
     return embaralhar(treino),embaralhar(test)
