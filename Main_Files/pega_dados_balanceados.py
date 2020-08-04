@@ -1,7 +1,6 @@
 import pandas as pd
 import random
-def get_dados(vet,sample_size=0.8,balanced=True):
-    df = pd.DataFrame(data= vet,columns=["Avaliação","Comentário"])
+def get_dados(df,sample_size=0.8,balanced=True):
     coment=df["Comentário"]
     aval = df["Avaliação"]
     cR = []
