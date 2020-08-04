@@ -34,7 +34,6 @@ def embaralhar(nwDF):
         rDF.at[c]=nwDF.loc[l[n]].values
         c+=1
         del(l[n])
-    print(rDF)
     return rDF
 
 def embaralhar_vet(vet):
