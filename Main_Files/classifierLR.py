@@ -3,7 +3,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
-import balancear
+import pega_dados_balanceados
 
 #balanceamento
 def writeResult(score, allBalanced, balancedFile, notBalancedFile): 
@@ -18,20 +18,23 @@ totalScore = 0
 i=0
 allBalanced = False
 resp = input("Deseja dados balanceados? y/n \n")
-while(i < 10):
-    if(resp == "y"):
+while ( i < 10):
+    if(resp ==  "y"):
         #pego todos os dados de forma balanceada 50%-50%
-        dados = balancear.get_balanced()
+        dtr,dts = pega_dados_balanceados.get_dados(pd.read_csv("comentarios.csv"),balanced = True)
         allBalanced = True
     elif(resp == "n"):
         #pega os dados desbalanceados
-        dados = balancear.shuffle()
+        dtr,dts = pega_dados_balanceados.get_dados(pd.read_csv("comentarios.csv"),balanced = False)
 
     #df = pd.read_csv('comentarios.csv').sample(1000, random_state=42, replace=True)
-    comments = dados["Comentário"]
-    evaluation = dados["Avaliação"]
+    for c in dts.values:
+        dtr.at[ dtr.last_valid_index()+1] = c
+
+
+    comments = dtr["Comentário"]
+    evaluation = dtr["Avaliação"]
     evaluation.value_counts()
-    dados.head()
 
     #vetorização dos dados
     vect = CountVectorizer(ngram_range=(1, 1))
