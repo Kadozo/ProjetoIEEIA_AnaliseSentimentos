@@ -1,46 +1,43 @@
-import balancear
+import pega_dados_balanceados
+import pandas as pd
 from sklearn.svm import SVC
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
 
-def writeResult(score, allBalanced, balancedFile, notBalancedFile):
-    if (allBalanced == True):
-        balancedFile.write(str(score) + "\n")
+def writeResult(score, allBalanced, balancedFile, notBalancedFile): 
+    if(allBalanced == True):
+        balancedFile.write(str(score)+"\n")
     else:
-        notBalancedFile.write(str(score) + "\n")
-
-
-balancedFile = open("ResultadosBalanceadosSVM.txt", "a")
-notBalancedFile = open("ResultadosDesbalanceadosSVM.txt", "a")
+        notBalancedFile.write(str(score)+"\n")
+    
+balancedFile = open("ResultadosBalanceadosNB.txt", "w")
+notBalancedFile = open("ResultadosDesbalanceadosNB.txt", "w")
 totalScore = 0
-i = 0
+i=0
 boole = False
 allBalanced = False
-while (i < 10):
-    while (boole == False):
-        resp = input("Deseja dados balanceados? y/n \n")
-        if (resp == "y"):
-            # pego todos os dados de forma balanceada 50%-50%
-            dados = balancear.get_balanced()
+resp = input("Deseja dados balanceados? y/n \n")
+while(i < 10):
+    while(boole == False):       
+        if(resp == "y"):
+            #pego todos os dados de forma balanceada 50%-50%
+            dados_treino, dados_test = pega_dados_balanceados.get_dados(pd.read_csv("comentarios.csv"), balanced = True)
             boole = True
             allBalanced = True
-        elif (resp == "n"):
-            # pega os dados desbalanceados
-            dados = balancear.shuffle()
+        elif(resp == "n"):
+            #pega os dados desbalanceados
+            dados_treino, dados_test = pega_dados_balanceados.get_dados(pd.read_csv("comentarios.csv"), balanced = False)
             boole = True
         else:
             boole = False
-
-    coment=dados["Comentário"]
-    aval = dados["Avaliação"]
-
+              
     #dados de treino
-    x_treino = coment[:int(len(coment) *.8) ]
-    y_treino = aval[:int(len(aval) *.8) ]
+    x_treino = dados_treino["Comentário"]
+    y_treino = dados_treino["Avaliação"]
 
-    #dados de validação
-    x_test = coment[int(len(coment) *.8): ]
-    y_test = aval[int(len(aval) *.8): ]
+    #dados de teste
+    x_test = dados_test["Comentário"]
+    y_test = dados_test["Avaliação"]
 
     #vetorização e escolhendo o classificador linear
     pipeline = Pipeline([
@@ -50,6 +47,7 @@ while (i < 10):
     pipeline.fit(x_treino, y_treino)
     #score linear
     score = pipeline.score(x_test, y_test)
+    print(score)
     totalScore += score
     i += 1
     writeResult(score, allBalanced, balancedFile, notBalancedFile)
