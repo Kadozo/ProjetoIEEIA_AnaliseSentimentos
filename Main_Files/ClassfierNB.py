@@ -12,8 +12,8 @@ def writeResult(score, allBalanced, balancedFile, notBalancedFile):
     else:
         notBalancedFile.write(str(score)+"\n")
     
-balancedFile = open("ResultadosBalanceadosNB.txt", "w")
-notBalancedFile = open("ResultadosDesbalanceadosNB.txt", "w")
+balancedFile = open("ResultadosBalanceadosNB.txt", "a")
+notBalancedFile = open("ResultadosDesbalanceadosNB.txt", "a")
 totalScore = 0
 i=0
 boole = False
