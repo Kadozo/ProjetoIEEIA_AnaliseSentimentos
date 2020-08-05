@@ -1,7 +1,6 @@
-import pandas as pd
 import nltk
-import balancear
-import random
+import pandas as pd
+import pega_dados_balanceados
 from nltk import word_tokenize
 from nltk.tokenize import TweetTokenizer
 from sklearn.feature_extraction.text import CountVectorizer
@@ -13,58 +12,48 @@ def writeResult(score, allBalanced, balancedFile, notBalancedFile):
     else:
         notBalancedFile.write(str(score)+"\n")
     
-balancedFile = open("ResultadosBalanceadosNB.txt", "a")
-notBalancedFile = open("ResultadosDesbalanceadosNB.txt", "a")
+balancedFile = open("ResultadosBalanceadosNB.txt", "w")
+notBalancedFile = open("ResultadosDesbalanceadosNB.txt", "w")
 totalScore = 0
 i=0
 boole = False
 allBalanced = False
+resp = input("Deseja dados balanceados? y/n \n")
 while(i < 10):
-    while(boole == False):
-        resp = input("Deseja dados balanceados? y/n \n")
+    while(boole == False):       
         if(resp == "y"):
             #pego todos os dados de forma balanceada 50%-50%
-            dados = balancear.get_balanced()
+            dados_treino, dados_test = pega_dados_balanceados.get_dados(pd.read_csv("comentarios.csv"), balanced = True)
             boole = True
             allBalanced = True
         elif(resp == "n"):
             #pega os dados desbalanceados
-            dados = balancear.shuffle()
+            dados_treino, dados_test = pega_dados_balanceados.get_dados(pd.read_csv("comentarios.csv"), balanced = False)
             boole = True
         else:
             boole = False
               
-    coment = dados["Comentário"]
-    aval = dados["Avaliação"]
-
     #dados de treino
-    dados_treino = coment[:int(len(coment) *.8) ]
-    dados_treino_aval = aval[:int(len(aval) *.8) ]
+    comment_train = dados_treino["Comentário"]
+    aval_train = dados_treino["Avaliação"]
 
     #dados de teste
-    dados_test = coment[int(len(coment) *.8): ]
-    dados_test_aval = aval[int(len(aval) *.8): ]
+    comment_test = dados_test["Comentário"]
+    aval_test = dados_test["Avaliação"]
 
     #vetorização
     tweet_tokenizer = TweetTokenizer()
     vectorizer = CountVectorizer(analyzer="word", tokenizer = tweet_tokenizer.tokenize)
-    freq_comments = vectorizer.fit_transform(dados_treino)
+    freq_comments = vectorizer.fit_transform(comment_train)
 
     #ML
     modelLearn= MultinomialNB()
-    modelLearn.fit(freq_comments, dados_treino_aval)
+    modelLearn.fit(freq_comments, aval_train)
 
-    #print dos predicts pra cada comentário
-    freq_comments = vectorizer.transform(dados_test)
-    #for t, c in zip (dados_test, modelLearn.predict(freq_comments)):
-       # print(t + ", " + c)
-
-    #array de probabilidades
-    #print(modelLearn.classes_)
-    #print(modelLearn.predict_proba(freq_comments).round(2))
+    freq_comments = vectorizer.transform(comment_test)
 
     #score
-    score = modelLearn.score(freq_comments, dados_test_aval)
+    score = modelLearn.score(freq_comments, aval_test)
     print(score)
     totalScore += score
     i += 1   
