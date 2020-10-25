@@ -66,3 +66,4 @@ while linha != "":
     linha = file.readline()  # manuntenção do loop
 
 df.to_csv("todos_commentarios.csv", index=False)  # salvando o csv
+print("Arquivos Formatados para csv")
