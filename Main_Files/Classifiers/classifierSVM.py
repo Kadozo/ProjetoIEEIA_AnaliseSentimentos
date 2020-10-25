@@ -1,59 +1,26 @@
-import pega_dados_balanceados
 import pandas as pd
 from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
+import pickle
 
-def writeResult(score, allBalanced, balancedFile, notBalancedFile): 
-    if(allBalanced == True):
-        balancedFile.write(str(score)+"\n")
-    else:
-        notBalancedFile.write(str(score)+"\n")
-    
-balancedFile = open("ResultadosBalanceadosNB.txt", "a")
-notBalancedFile = open("ResultadosDesbalanceadosNB.txt", "a")
-totalScore = 0
-i=0
-boole = False
-allBalanced = False
-resp = input("Deseja dados balanceados? y/n \n")
-while(i < 10):
-    while(boole == False):       
-        if(resp == "y"):
-            #pego todos os dados de forma balanceada 50%-50%
-            dados_treino, dados_test = pega_dados_balanceados.get_dados(pd.read_csv("comentarios.csv"), balanced = True)
-            boole = True
-            allBalanced = True
-        elif(resp == "n"):
-            #pega os dados desbalanceados
-            dados_treino, dados_test = pega_dados_balanceados.get_dados(pd.read_csv("comentarios.csv"), balanced = False)
-            boole = True
-        else:
-            boole = False
-              
-    #dados de treino
-    x_treino = dados_treino["Comentário"]
-    y_treino = dados_treino["Avaliação"]
+df = pd.read_csv("DB\\todos_commentarios.csv")
+i = 0
+y = []
+while i<df.shape[0]:
+    y.append(df.loc[i,'Avaliação'])
+    i = i+1
+x = []
+i = 0
+while i<df.shape[0]:
+    x.append(df.loc[i,'Comentário'])
+    i = i+1
 
-    #dados de teste
-    x_test = dados_test["Comentário"]
-    y_test = dados_test["Avaliação"]
+x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=0)
+pipe = Pipeline([('counts', CountVectorizer()),('classifier', SVC(kernel='linear',probability=True,random_state=1))])
+pipe.fit(x_train,y_train)
+print(pipe.score(x_test,y_test))
 
-    #vetorização e escolhendo o classificador linear
-    pipeline = Pipeline([
-      ('counts', CountVectorizer()),
-      ('classifier', SVC(kernel='linear',probability=True,random_state=1))
-    ])
-    pipeline.fit(x_treino, y_treino)
-    #score linear
-    score = pipeline.score(x_test, y_test)
-    print(score)
-    totalScore += score
-    i += 1
-    writeResult(score, allBalanced, balancedFile, notBalancedFile)
-    allBalanced = False
-    boole = False
-average = totalScore / 10
-balancedFile.close()
-notBalancedFile.close()
-print(average)
+#Salvando o Modelo
+pickle.dump(pipe, open("models\\SVM.sav", 'wb'))
