@@ -1,10 +1,12 @@
 import nltk
+import numpy as np
 import pandas as pd
-import pega_dados_balanceados
 from nltk import word_tokenize
 from nltk.tokenize import TweetTokenizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score
 
 def writeResult(score, allBalanced, balancedFile, notBalancedFile): 
     if(allBalanced == True):
@@ -14,6 +16,16 @@ def writeResult(score, allBalanced, balancedFile, notBalancedFile):
     
 balancedFile = open("ResultadosBalanceadosNB.txt", "a")
 notBalancedFile = open("ResultadosDesbalanceadosNB.txt", "a")
+df = pd.read_csv("DB\\todos_commentarios.csv")
+
+comments = df["Comentário"]
+evaluation = df["Avaliação"]
+
+#vetorização
+tweet_tokenizer = TweetTokenizer()
+vectorizer = CountVectorizer(analyzer="word", tokenizer = tweet_tokenizer.tokenize)
+vect_comments = vectorizer.fit_transform(comments)
+
 totalScore = 0
 i=0
 boole = False
@@ -22,42 +34,33 @@ resp = input("Deseja dados balanceados? y/n \n")
 while(i < 10):
     while(boole == False):       
         if(resp == "y"):
-            #pego todos os dados de forma balanceada 50%-50%
-            dados_treino, dados_test = pega_dados_balanceados.get_dados(pd.read_csv("comentarios.csv"), balanced = True)
+            #pega todos os dados de forma balanceada
+            
             boole = True
             allBalanced = True
         elif(resp == "n"):
-            #pega os dados desbalanceados
-            dados_treino, dados_test = pega_dados_balanceados.get_dados(pd.read_csv("comentarios.csv"), balanced = False)
+            x_train, x_test, y_train, y_test = train_test_split(vect_comments, 
+                                                                evaluation, 
+                                                                test_size=0.3, 
+                                                                random_state= np.random.randint(0,10000))
             boole = True
         else:
             boole = False
-              
-    #dados de treino
-    comment_train = dados_treino["Comentário"]
-    aval_train = dados_treino["Avaliação"]
-
-    #dados de teste
-    comment_test = dados_test["Comentário"]
-    aval_test = dados_test["Avaliação"]
-
-    #vetorização
-    tweet_tokenizer = TweetTokenizer()
-    vectorizer = CountVectorizer(analyzer="word", tokenizer = tweet_tokenizer.tokenize)
-    freq_comments = vectorizer.fit_transform(comment_train)
 
     #ML
-    modelLearn= MultinomialNB()
-    modelLearn.fit(freq_comments, aval_train)
+    model= MultinomialNB()
+    model.fit(x_train, y_train)
 
-    freq_comments = vectorizer.transform(comment_test)
 
     #score
-    score = modelLearn.score(freq_comments, aval_test)
-    print(score)
-    totalScore += score
+    prediction = model.predict(x_test)
+    f1 = f1_score(prediction, y_test, average = 'weighted')
+
+    print(f1)
+    totalScore += f1
     i += 1   
-    writeResult(score, allBalanced, balancedFile, notBalancedFile)
+
+    writeResult(f1, allBalanced, balancedFile, notBalancedFile)
     allBalanced = False
     boole = False
 
